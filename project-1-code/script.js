@@ -49,21 +49,36 @@ window.onload = function() {
         //would only happen if the unicorn is already jumping and you press up again.
         if (controller.up && this.jumping === false) {
           // console.log("here")
-          this.velocityY -= 20;
+          this.velocityY -= 40;
+          this.jumping = true;
+    
+         }
+
+         if (controller.left && controller.up && (this.jumping === false)) {
+          // console.log("here")
+          this.velocityY -= 38;
+          this.velocityX -= 30;
           this.jumping = true;
          }
         
         //If the left key is pressed, velocity increases (or decreases) by this amount
         if (controller.left) {
-          this.velocityX -= 0.5;
+          this.velocityX -= 0.25;
          }
          //If the right key is pressed, velocity increases (or decreases) by this amount
         if (controller.right) {
-          this.velocityX += 0.5;
+          this.velocityX += 0.25;
+         }
+
+        if (controller.right && controller.up && (this.jumping === false)) {
+          // console.log("here")
+          this.velocityY -= 38;
+          this.velocityX += 50;
+          this.jumping = true;
          }
         
         // THEN THESE THINGS HAPPEN ONCE THE IFS ARE TESTED:
-         this.velocityY += 1.25;// gravity
+         this.velocityY += 0.55;// gravity
          this.x += this.velocityX; //
          this.y += this.velocityY;
          this.velocityX *= 0.9;// friction
@@ -93,10 +108,10 @@ window.onload = function() {
       constructor(x,y,width,height){
         this.x = 970;
         this.velocityX = -5;
-        this.y = 150;
-        this.width = 100;
-        this.height = 300;
-        this.img = '../images/hoop.png';
+        this.y = 530;
+        this.width = 50;
+        this.height = 30;
+        this.img = '../images/rock.png';
       }
   
       drawObstacle(){
@@ -105,14 +120,31 @@ window.onload = function() {
         ctx.drawImage(obstacleImg, this.x, this.y, this.width, this.height)
       }
   
-      moveObstacle(){
-        this.x += this.velocityX;  
-          
-        this.drawObstacle(this.x,this.y,this.width,this.height);
+      leftPosition(){
+        return this.x + 10;
+      }
+      rightPosition(){
+        return this.x + this.width;
+      }
+  
+      topPosition(){
+        return this.y + 20;
       }
       
+      bottomPosition(){
+        return this.y + this.height;
+      }
+
       } //End of Obstacle class.
      
+// DETECT COLLISION ----------------------------------------------------
+
+function detectCollision(obstacle){
+  return !((currentUnicorn.y - 200 > obstacle.bottomPosition()) || 
+  (currentUnicorn.x + currentUnicorn.width - 75 < obstacle.leftPosition()) || 
+  (currentUnicorn.x - 300 > obstacle.rightPosition()));
+ }
+
 
  // BACKGROUND FUNCTIONS -----------------------------------------------------------------
   
@@ -123,7 +155,7 @@ window.onload = function() {
  let backgroundImage = {
   img: background,
   backgroundX: 0,
-  speed: -0.5,
+  speed: -0.75,
    
   move: function() {
    if (controller.left || controller.up || controller.right) {
@@ -232,8 +264,8 @@ window.onload = function() {
       // console.log(currentGame);
       currentUnicorn.drawUnicorn();
       
-      currentGame.obstacle = currentObstacle;
-      currentObstacle.drawObstacle();
+      
+      //currentObstacle.drawObstacle();
   
       console.log("game started");
   
@@ -249,8 +281,40 @@ window.onload = function() {
       // ctx.clearRect(0, 0 , 1024, 600);
       //currentUnicorn.drawUnicorn();
       currentUnicorn.moveUnicorn();
-      currentObstacle.drawObstacle();
-      currentObstacle.x -= 0.75
+      frames ++;
+
+      if (frames % 600 === 1) {
+      let obstacle = new Obstacle(this.x, this.y, this.width, this.height);
+      currentGame.obstacles.push(obstacle);
+      }
+      
+      for (let i=0; i<currentGame.obstacles.length; i++){
+        currentGame.obstacles[i].x -= 0.75
+        currentGame.obstacles[i].drawObstacle();
+        
+        if(detectCollision(currentGame.obstacles[i])){
+          //alert("You got hurt!");
+
+          frames = 0;
+          currentGame.score = 0;
+          document.getElementById("score").innerHTML = currentGame.score;
+  
+          currentGame.obstacles = [];
+          document.querySelector('.game-intro').style.display = "flex";
+          
+        }
+  
+  
+        if(currentGame.obstacles[i].x <= 20){
+          currentGame.obstacles.splice(i, 1);
+          currentGame.score ++;
+          document.getElementById("score").innerHTML = currentGame.score;
+        }
+
+
+      }
+      //currentObstacle.drawObstacle();
+      //currentObstacle.x -= 0.75
       
      
       requestAnimationFrame(update);
