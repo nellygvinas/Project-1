@@ -313,8 +313,8 @@ function detectCollision(obstacle){
   
           currentGame.obstacles = [];
           
-          //document.querySelector('.game-intro').style.display = "flex";
-          //document.getElementById('game-board').style.display = "none";
+          document.querySelector('.game-intro').style.display = "flex";
+          document.getElementById('game-board').style.display = "none";
 
         }
   
