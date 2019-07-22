@@ -30,7 +30,7 @@ document.getElementById('game-board').style.display = "none";
         this.width = 180;
         this.height = 160;
         this.jumping = true;
-        this.img = '../images/unicorn-idle.gif';
+        this.img = './images/unicorn-idle.gif';
       }
   
       drawUnicorn(){
@@ -99,7 +99,7 @@ document.getElementById('game-board').style.display = "none";
         this.y = 450;
         this.width = 180;
         this.height = 160;
-        this.img = '../images/evil-unicorn.png';
+        this.img = './images/evil-unicorn.png';
       }
   
       drawObstacle(){
@@ -143,7 +143,7 @@ function detectCollision(obstacle){
  // BACKGROUND FUNCTIONS -----------------------------------------------------------------
   
  let background = new Image();
- background.src = '../images/forest01.png';
+ background.src = './images/forest01.png';
  
    
  let backgroundImage = {
