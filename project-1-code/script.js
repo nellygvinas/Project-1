@@ -1,7 +1,8 @@
 window.onload = function() {
   
+document.getElementById('game-board').style.display = "none";
 
- // Declare variables
+// Declare variables
   let currentGame, currentUnicorn, controller;
 
   
@@ -26,8 +27,8 @@ window.onload = function() {
         this.velocityX = 0;
         this.y = 450;
         this.velocityY = 0;
-        this.width = 205;
-        this.height = 150;
+        this.width = 180;
+        this.height = 160;
         this.jumping = true;
         this.img = '../images/unicorn-idle.gif';
       }
@@ -49,33 +50,20 @@ window.onload = function() {
         //would only happen if the unicorn is already jumping and you press up again.
         if (controller.up && this.jumping === false) {
           // console.log("here")
-          this.velocityY -= 40;
+          this.velocityY -= 50;
           this.jumping = true;
     
          }
 
-         if (controller.left && controller.up && (this.jumping === false)) {
-          // console.log("here")
-          this.velocityY -= 38;
-          this.velocityX -= 30;
-          this.jumping = true;
-         }
-        
         //If the left key is pressed, velocity increases (or decreases) by this amount
         if (controller.left) {
-          this.velocityX -= 0.25;
+          this.x -= 0.10;
          }
          //If the right key is pressed, velocity increases (or decreases) by this amount
         if (controller.right) {
-          this.velocityX += 0.25;
+          this.x += 0.10;
          }
 
-        if (controller.right && controller.up && (this.jumping === false)) {
-          // console.log("here")
-          this.velocityY -= 38;
-          this.velocityX += 50;
-          this.jumping = true;
-         }
         
         // THEN THESE THINGS HAPPEN ONCE THE IFS ARE TESTED:
          this.velocityY += 0.55;// gravity
@@ -94,8 +82,8 @@ window.onload = function() {
         }
       
         // If unicorn is going off the left of the screen
-        if (this.x < -205) {
-          this.x = 1024;
+        if (this.x < -30) {
+          this.x = -30;
         } else if (this.x > 870) { // Stops unicorn from going past right boundary.
           this.x = 870;
         }  
@@ -107,11 +95,11 @@ window.onload = function() {
     class Obstacle {
       constructor(x,y,width,height){
         this.x = 970;
-        this.velocityX = -5;
-        this.y = 530;
-        this.width = 50;
-        this.height = 30;
-        this.img = '../images/rock.png';
+        this.velocityX = 0;
+        this.y = 450;
+        this.width = 180;
+        this.height = 160;
+        this.img = '../images/evil-unicorn.png';
       }
   
       drawObstacle(){
@@ -120,18 +108,18 @@ window.onload = function() {
         ctx.drawImage(obstacleImg, this.x, this.y, this.width, this.height)
       }
   
-      leftPosition(){
-        return this.x + 10;
+      topXPosition(){
+        return this.x;
       }
-      rightPosition(){
+      topRightPosition(){
         return this.x + this.width;
       }
   
-      topPosition(){
-        return this.y + 20;
+      topYPosition(){
+        return this.y;
       }
       
-      bottomPosition(){
+      bottomYPosition(){
         return this.y + this.height;
       }
 
@@ -140,30 +128,49 @@ window.onload = function() {
 // DETECT COLLISION ----------------------------------------------------
 
 function detectCollision(obstacle){
-  return !((currentUnicorn.y - 200 > obstacle.bottomPosition()) || 
-  (currentUnicorn.x + currentUnicorn.width - 75 < obstacle.leftPosition()) || 
-  (currentUnicorn.x - 300 > obstacle.rightPosition()));
+ // If any of the below are false, return true. 
+ // Statement 1: is the y of the unicorn greater than (lower than) the bottom position of the obstacle?.
+ // Statement 2: is the current unicorn's x position and width less than the left x position of  
+ // the obstacle?
+ // Statement 3: is 
+ 
+  return ((currentUnicorn.x + currentUnicorn.width - 75 > obstacle.topXPosition())
+  && currentUnicorn.y + currentUnicorn.height - 100 > obstacle.topYPosition()) // && currentUnicorn.y + currentUnicorn.height < obstacle.bottomYPosition())
  }
+ 
 
 
  // BACKGROUND FUNCTIONS -----------------------------------------------------------------
   
  let background = new Image();
- background.src = '../images/flat-nature-art-fit.png';
+ background.src = '../images/forest01.png';
  
    
  let backgroundImage = {
   img: background,
   backgroundX: 0,
-  speed: -0.75,
+  speed: -1.5,
    
   move: function() {
-   if (controller.left || controller.up || controller.right) {
+    if (controller.right) {
+      this.speed = -1.5;
+      this.backgroundX += this.speed;
+      this.backgroundX %= canvas.width;
+    }
+
+    if (controller.left) {
+   this.speed = 1;   
    this.backgroundX += this.speed;
    this.backgroundX %= canvas.width;
-   }
-   //this.backgroundX += this.speed;
-   //this.backgroundX %= canvas.width;
+    }
+
+  //  if (this.backgroundX < 0) {
+  //     this.backgroundX = 1025;
+  //  } else if (this.backgroundX >= 1024) { // Stops unicorn from going past right boundary.
+  //     this.backgroundX = 1023;
+  //   }  
+
+    //this.draw;
   },
    
   draw: function() {
@@ -171,19 +178,21 @@ function detectCollision(obstacle){
      if (this.speed < 0) {
        ctx.drawImage(this.img, this.backgroundX + canvas.width, 0);
      } else {
-         ctx.drawImage(this.img, this.backgroundX - this.img.width, 0);
+         ctx.drawImage(this.img, this.backgroundX - canvas.width, 0);
      }
    },
  };
    
    
    function updateBackground() {
-     ctx.clearRect(0, 0, canvas.width, canvas.height);
-     backgroundImage.draw();
-     backgroundImage.move();  
-     requestAnimationFrame(updateBackground);
-   
+    backgroundImage.move();  
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    backgroundImage.draw();
+      
+     //requestAnimationFrame(updateBackground);
    }
+
+   backgroundImage.onload = updateBackground;
 
 
 
@@ -219,8 +228,6 @@ function detectCollision(obstacle){
     currentUnicorn.moveUnicorn(whereToGo);
      }
 
-
-
     }
   
   window.addEventListener("keydown", controller.keyListener)
@@ -254,15 +261,15 @@ function detectCollision(obstacle){
     
     function startGame() {
       //ctx.clearRect(0, 0, 1024, 600);
-      updateBackground();
+      //updateBackground();
       
       currentGame = new Game();
       currentUnicorn = new Unicorn();
-      currentObstacle = new Obstacle();
+      //currentObstacle = new Obstacle();
 
       currentGame.unicorn = currentUnicorn;
       // console.log(currentGame);
-      currentUnicorn.drawUnicorn();
+      //currentUnicorn.drawUnicorn();
       
       
       //currentObstacle.drawObstacle();
@@ -279,35 +286,41 @@ function detectCollision(obstacle){
     
     function update(){
       // ctx.clearRect(0, 0 , 1024, 600);
-      //currentUnicorn.drawUnicorn();
-      currentUnicorn.moveUnicorn();
-      frames ++;
+      //currentUnicorn.drawUnicorn();  
+    backgroundImage.move();  
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    backgroundImage.draw();
 
-      if (frames % 600 === 1) {
+    currentUnicorn.drawUnicorn();
+    currentUnicorn.moveUnicorn();
+    frames ++;
+
+      if (frames % 300 === 1) {
       let obstacle = new Obstacle(this.x, this.y, this.width, this.height);
       currentGame.obstacles.push(obstacle);
       }
       
-      for (let i=0; i<currentGame.obstacles.length; i++){
-        currentGame.obstacles[i].x -= 0.75
+      for (let i=0; i < currentGame.obstacles.length; i++){
+        currentGame.obstacles[i].x -= 5
         currentGame.obstacles[i].drawObstacle();
         
         if(detectCollision(currentGame.obstacles[i])){
-          //alert("You got hurt!");
+          alert("You hit the obstacle!");
 
           frames = 0;
           currentGame.score = 0;
           document.getElementById("score").innerHTML = currentGame.score;
   
           currentGame.obstacles = [];
-          document.querySelector('.game-intro').style.display = "flex";
           
+          //document.querySelector('.game-intro').style.display = "flex";
+          //document.getElementById('game-board').style.display = "none";
+
         }
   
-  
-        if(currentGame.obstacles[i].x <= 20){
+        if(currentGame.obstacles[i].x <= 10){
           currentGame.obstacles.splice(i, 1);
-          currentGame.score ++;
+          currentGame.score += 10;
           document.getElementById("score").innerHTML = currentGame.score;
         }
 
