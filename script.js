@@ -65,7 +65,7 @@ document.getElementById('game-board').style.display = "none";
          }
 
         // THEN THESE THINGS HAPPEN ONCE THE IFS ARE TESTED:
-         this.velocityY += 0.85;// gravity
+         this.velocityY += 0.95;// gravity
          this.x += this.velocityX; //
          this.y += this.velocityY;
          this.velocityX *= 0.2;// friction
@@ -280,8 +280,7 @@ function detectCollision(obstacle){
     
   // UPDATE ------------------------------------
     let frames = 0;
-    let collision counter = 0;
-
+   
     function update(){
       // ctx.clearRect(0, 0 , 1024, 600);
       //currentUnicorn.drawUnicorn();  
