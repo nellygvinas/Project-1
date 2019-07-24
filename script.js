@@ -4,6 +4,7 @@ document.getElementById('game-board').style.display = "none";
 
 // Declare variables
   let currentGame, currentUnicorn, controller;
+  let gameOver = false;
 
   
  //Grab canvas and set canvas context
@@ -133,8 +134,8 @@ function detectCollision(obstacle){
  // Statement 3: is 
  
   return ((currentUnicorn.x + currentUnicorn.width - 75 > obstacle.topXPosition())
-  && currentUnicorn.y + currentUnicorn.height - 100 > obstacle.topYPosition() 
-  && currentUnicorn.x + 40 < obstacle.topRightPosition()) // && currentUnicorn.y + currentUnicorn.height < obstacle.bottomYPosition())
+  && currentUnicorn.y + currentUnicorn.height - 120 > obstacle.topYPosition() 
+  && currentUnicorn.x + 60 < obstacle.topRightPosition()) // && currentUnicorn.y + currentUnicorn.height < obstacle.bottomYPosition())
  }
  
 
@@ -222,7 +223,6 @@ function detectCollision(obstacle){
      
     whereToGo = event.keycode;
     currentUnicorn.moveUnicorn(whereToGo);
-    backgroundImage.assignSpeed(whereToGo);
      }
 
     }
@@ -250,7 +250,23 @@ function detectCollision(obstacle){
     // check to see if working
     console.log("start button clicked");
   }
+   
+  document.getElementById("play-again").onclick = function() {
     
+    continueObstacles = true;
+    gameOver = false;
+    document.getElementById("play-again").style.display = "none";
+    document.getElementById("score").innerHTML = currentGame.score;
+    // Set start page display to none, and change canvas display to flex to appear.
+    document.querySelector('.game-intro').style.display = "none";
+    document.getElementById('game-board').style.display = "flex";
+    
+    startGame();
+    // check to see if working
+    console.log("play again button clicked");
+  }
+
+  
   //--------------------------------------------------------------------------------------
   
   
@@ -280,6 +296,9 @@ function detectCollision(obstacle){
     
   // UPDATE ------------------------------------
     let frames = 0;
+    let continueObstacles = true;
+    let wonGame = false;
+    let lostGame = false;
    
     function update(){
       // ctx.clearRect(0, 0 , 1024, 600);
@@ -292,26 +311,29 @@ function detectCollision(obstacle){
     currentUnicorn.moveUnicorn();
     frames ++;
 
-      if (frames % 300 === 1) {
-      let obstacle = new Obstacle(this.x, this.y, this.width, this.height);
-      currentGame.obstacles.push(obstacle);
+      if (continueObstacles) {
+        if (frames % 300 === 1) {
+        let obstacle = new Obstacle(this.x, this.y, this.width, this.height);
+        currentGame.obstacles.push(obstacle);
+        }
       }
       
       for (let i=0; i < currentGame.obstacles.length; i++){
         currentGame.obstacles[i].x -= 5
         currentGame.obstacles[i].drawObstacle();
-        
-        if(detectCollision(currentGame.obstacles[i])){
-          alert("Your unicorn was hurt!");
 
-          //frames = 0;
+      
+        if(detectCollision(currentGame.obstacles[i])){
+
           currentGame.score = 0;
           document.getElementById("score").innerHTML = currentGame.score;
-          startGame();
-          //currentGame.obstacles = [];
+
+          currentGame.obstacles = [];
           
-          // document.querySelector('.game-intro').style.display = "flex";
-          // document.getElementById('game-board').style.display = "none";
+          //document.querySelector('.game-intro').style.display = "flex";
+          //document.getElementById('game-board').style.display = "none";
+          lostGame = true;
+          endGame();
         }
       
   
@@ -319,30 +341,47 @@ function detectCollision(obstacle){
           currentGame.obstacles.splice(i, 1);
           currentGame.score += 10;
           document.getElementById("score").innerHTML = currentGame.score;
+          if (currentGame.score === 30) {
+          continueObstacles = false;
+          gameOver = true;
+          wonGame = true;
+          endGame();
+          }
         }
-
-
+        
       }
-      //currentObstacle.drawObstacle();
-      //currentObstacle.x -= 0.75
-      
      
-      requestAnimationFrame(update);
+      if (gameOver === false) {
+        requestAnimationFrame(update);
   
     }
   
-  } // end of window on-load function
+  } // end of update function
 
 
+function endGame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  backgroundImage.draw();
+        
+  if (wonGame) {
+        ctx.font = "80px bold Sacramento";
+        ctx.fillStyle = "pink";
+        ctx.fillText("YOU WON!!", 275, 300); 
+
+        currentGame.score = 0;
+        currentGame.obstacles = [];
+        document.getElementById("play-again").style.display = "flex";
+  }
+  else if (lostGame) {
+        ctx.font = "80px bold Sacramento";
+        ctx.fillStyle = "pink";
+        ctx.fillText("YOU LOST! TRY AGAIN!", 100, 300); 
+
+        currentGame.score = 0;
+        currentGame.obstacles = [];
+        document.getElementById("play-again").style.display = "flex";
+  }
+}
 
 
-
-
-
-
-
-
-
-
-
-
+} // END OF WINDOW ONLOAD
