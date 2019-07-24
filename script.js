@@ -18,6 +18,7 @@ document.getElementById('game-board').style.display = "none";
         this.unicorn = {}; // unicorn => object
         this.obstacles = []; // obstacles => array
         this.score = 0;
+        this.lives = 3;
       }
     }
   
@@ -42,7 +43,7 @@ document.getElementById('game-board').style.display = "none";
         // }
       }
   
-      moveUnicorn(num){
+      moveUnicorn(){
       //  ctx.clearRect(this.x, this.y, this.width, this.height);
        
         //If the up key is pressed and the unicorn is jumping, this happens.
@@ -52,27 +53,24 @@ document.getElementById('game-board').style.display = "none";
           // console.log("here")
           this.velocityY -= 50;
           this.jumping = true;
-    
          }
 
         //If the left key is pressed, velocity increases (or decreases) by this amount
         if (controller.left) {
-          this.x -= 0.10;
+          this.x -= 1;
          }
          //If the right key is pressed, velocity increases (or decreases) by this amount
         if (controller.right) {
-          this.x += 0.10;
+          this.x += 1;
          }
 
-        
         // THEN THESE THINGS HAPPEN ONCE THE IFS ARE TESTED:
-         this.velocityY += 0.55;// gravity
+         this.velocityY += 0.85;// gravity
          this.x += this.velocityX; //
          this.y += this.velocityY;
-         this.velocityX *= 0.9;// friction
+         this.velocityX *= 0.2;// friction
          this.velocityY *= 0.9;// friction
 
-      
         // If the unicorn is falling below floor line. Sets jumping to false. 
         // Unicorn starts at 450 on y, this makes sure it does not go past 450 (falling)
         if (this.y > 450) {
@@ -97,7 +95,7 @@ document.getElementById('game-board').style.display = "none";
         this.x = 970;
         this.velocityX = 0;
         this.y = 450;
-        this.width = 180;
+        this.width = 150;
         this.height = 160;
         this.img = './images/evil-unicorn.png';
       }
@@ -135,10 +133,10 @@ function detectCollision(obstacle){
  // Statement 3: is 
  
   return ((currentUnicorn.x + currentUnicorn.width - 75 > obstacle.topXPosition())
-  && currentUnicorn.y + currentUnicorn.height - 100 > obstacle.topYPosition()) // && currentUnicorn.y + currentUnicorn.height < obstacle.bottomYPosition())
+  && currentUnicorn.y + currentUnicorn.height - 100 > obstacle.topYPosition() 
+  && currentUnicorn.x + 40 < obstacle.topRightPosition()) // && currentUnicorn.y + currentUnicorn.height < obstacle.bottomYPosition())
  }
  
-
 
  // BACKGROUND FUNCTIONS -----------------------------------------------------------------
   
@@ -149,39 +147,37 @@ function detectCollision(obstacle){
  let backgroundImage = {
   img: background,
   backgroundX: 0,
-  speed: -1.5,
+  speed: -0.5,
    
   move: function() {
-    if (controller.right) {
-      this.speed = -1.5;
-      this.backgroundX += this.speed;
-      this.backgroundX %= canvas.width;
-    }
-
-    if (controller.left) {
-   this.speed = 1;   
-   this.backgroundX += this.speed;
-   this.backgroundX %= canvas.width;
-    }
-
-  //  if (this.backgroundX < 0) {
-  //     this.backgroundX = 1025;
-  //  } else if (this.backgroundX >= 1024) { // Stops unicorn from going past right boundary.
-  //     this.backgroundX = 1023;
-  //   }  
-
-    //this.draw;
+    // if (controller.left) {
+    //   this.speed = 1.5;
+    // }
+    // else if (controller.right) {
+    //   this.speed = -1.5;
+    // } 
+    // else {
+    //   this.speed = 0;
+    // }
+    this.backgroundX += this.speed;
+    this.backgroundX %= canvas.width;
   },
+  
    
-  draw: function() {
+  draw: function(){
     ctx.drawImage(this.img, this.backgroundX, 0);
      if (this.speed < 0) {
        ctx.drawImage(this.img, this.backgroundX + canvas.width, 0);
-     } else {
-         ctx.drawImage(this.img, this.backgroundX - canvas.width, 0);
+     } 
+     else if (this.speed > 0) {
+        ctx.drawImage(this.img, this.backgroundX - canvas.width, 0);
+     }
+     else {
+       ctx.drawImage(this.img, this.backgroundX + canvas.width, 0);
      }
    },
- };
+ 
+};
    
    
    function updateBackground() {
@@ -192,14 +188,15 @@ function detectCollision(obstacle){
      //requestAnimationFrame(updateBackground);
    }
 
-   backgroundImage.onload = updateBackground;
+   //backgroundImage.onload = updateBackground;
 
 
 
   
  // CONTROLLER - ON KEYDOWN FUNCTION -------------------------------------------------------------------------
   
-   
+  
+ 
   controller = {
     left:false,
     right:false,
@@ -224,8 +221,8 @@ function detectCollision(obstacle){
       }
      
     whereToGo = event.keycode;
-    //currentGame.unicorn.moveUnicorn(whereToGo); 
     currentUnicorn.moveUnicorn(whereToGo);
+    backgroundImage.assignSpeed(whereToGo);
      }
 
     }
@@ -283,7 +280,8 @@ function detectCollision(obstacle){
     
   // UPDATE ------------------------------------
     let frames = 0;
-    
+    let collision counter = 0;
+
     function update(){
       // ctx.clearRect(0, 0 , 1024, 600);
       //currentUnicorn.drawUnicorn();  
@@ -305,18 +303,18 @@ function detectCollision(obstacle){
         currentGame.obstacles[i].drawObstacle();
         
         if(detectCollision(currentGame.obstacles[i])){
-          alert("You hit the obstacle!");
+          alert("Your unicorn was hurt!");
 
-          frames = 0;
+          //frames = 0;
           currentGame.score = 0;
           document.getElementById("score").innerHTML = currentGame.score;
-  
-          currentGame.obstacles = [];
+          startGame();
+          //currentGame.obstacles = [];
           
-          document.querySelector('.game-intro').style.display = "flex";
-          document.getElementById('game-board').style.display = "none";
-
+          // document.querySelector('.game-intro').style.display = "flex";
+          // document.getElementById('game-board').style.display = "none";
         }
+      
   
         if(currentGame.obstacles[i].x <= 10){
           currentGame.obstacles.splice(i, 1);
